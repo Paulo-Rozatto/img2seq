@@ -6,14 +6,6 @@ from numpy import fromstring
 import torch
 from torch.utils.data import Dataset
 
-
-class ToZeroOne(object):
-    """Convert 0-255 range to 0-1"""
-
-    def __call__(self, tensor):
-        return tensor.to(torch.float32) / 255
-
-
 class PolyMNIST(Dataset):
     def __init__(self, csv_file, transform=None, label_transform=None):
         self.df = read_csv(csv_file)
@@ -28,12 +20,12 @@ class PolyMNIST(Dataset):
         image_path = path.join(self.path, self.df.file_path[index])
         image = Image.open(image_path)
 
-        label = torch.zeros(10, dtype=torch.float32)
-        label[self.df.label[index]] = 1
+        label = int(self.df.label[index])
 
         polygon = self.df.polygon[index]
-        polygon = torch.tensor(fromstring(
-            polygon[1:-1], sep=",").reshape(-1, 2))
+        polygon = torch.tensor(
+            fromstring(polygon, sep=",").reshape(-1, 2)
+        )
 
         if self.transform:
             image = self.transform(image)
