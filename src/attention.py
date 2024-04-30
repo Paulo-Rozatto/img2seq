@@ -24,7 +24,8 @@ class Attention(nn.Module):
         # then, reshape to split query, keys and values and to
         # distribute values across heads
         x = self.qkv(x)
-        q, v, k = x.reshape(b, n, 3, self.n_heads, -1).unbind(2)
+        # q, v, k = x.reshape(b, n, 3, self.n_heads, -1).unbind(2)
+        q, v, k = x.reshape(b, n, 3, -1).unbind(2)
 
         attention = (q @ k.transpose(-2, -1)) * self.scaling_factor
         attention = attention.softmax(dim=-1) @ v

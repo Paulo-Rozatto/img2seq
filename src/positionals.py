@@ -1,10 +1,16 @@
-from torch import nn, randn
+import torch
+from torch import nn
 
 
 class LearnableEncoder(nn.Module):
-    def __init__(self, embed_dim=16):
+    def __init__(self, input_dim, embed_dim=16):
         super(LearnableEncoder, self).__init__()
-        self.positional = nn.Parameter(randn(embed_dim))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.positional = nn.Parameter(
+            torch.randn(input_dim, embed_dim).to(device))
 
     def forward(self, x):
-        return x + self.positional
+        b = x.shape[0]
+        pos = self.positional.repeat(b, 1, 1)
+        x = x + pos
+        return x

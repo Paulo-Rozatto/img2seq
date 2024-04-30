@@ -2,14 +2,24 @@ from os import path
 from PIL import Image
 from pandas import read_csv
 from numpy import fromstring
-from torch import Dataset
+
+import torch
+from torch.utils.data import Dataset
+
+
+class ToZeroOne(object):
+    """Convert 0-255 range to 0-1"""
+
+    def __call__(self, tensor):
+        return tensor.to(torch.float32) / 255
 
 
 class PolyMNIST(Dataset):
-    def __init__(self, csv_file, transform=None):
+    def __init__(self, csv_file, transform=None, label_transform=None):
         self.df = read_csv(csv_file)
         self.path = path.dirname(csv_file)
         self.transform = transform
+        self.label_transform = label_transform
 
     def __len__(self):
         return self.df.shape[0]
@@ -17,10 +27,18 @@ class PolyMNIST(Dataset):
     def __getitem__(self, index):
         image_path = path.join(self.path, self.df.file_path[index])
         image = Image.open(image_path)
-        label = self.df.label[index]
+
+        label = torch.zeros(10, dtype=torch.float32)
+        label[self.df.label[index]] = 1
+
         polygon = self.df.polygon[index]
-        polygon = fromstring(polygon[1:-1]).reshape(-1, 2)
+        polygon = torch.tensor(fromstring(
+            polygon[1:-1], sep=",").reshape(-1, 2))
 
         if self.transform:
             image = self.transform(image)
+
+        if self.label_transform:
+            label = self.label_transform(label)
+
         return image, label
