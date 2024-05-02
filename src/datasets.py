@@ -1,6 +1,7 @@
 from os import path
 from PIL import Image
-from pandas import read_csv
+# from pandas import read_csv
+import pandas as pd
 import numpy as np
 # from numpy import fromstring, zeros
 
@@ -9,7 +10,7 @@ from torch.utils.data import Dataset
 
 class PolyMNIST(Dataset):
     def __init__(self, csv_file, transform=None, label_transform=None, return_poly=True):
-        self.df = read_csv(csv_file)
+        self.df = pd.read_csv(csv_file)
         self.path = path.dirname(csv_file)
         self.transform = transform
         self.label_transform = label_transform
