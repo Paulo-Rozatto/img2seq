@@ -16,7 +16,7 @@ class Attention(nn.Module):
         self.linear_proj = nn.Linear(embed_dim, embed_dim, proj_bias)
         self.qkv = nn.Linear(embed_dim, embed_dim * 3, attention_bias)
 
-    def forward(self, x):
+    def forward(self, x, mask=None):
         # b: batch size, n: number of patches
         b, n, _ = x.shape
 
@@ -30,6 +30,10 @@ class Attention(nn.Module):
             .unbind(0)
 
         attention = (q @ k.transpose(-2, -1)) * self.scaling_factor
+
+        if mask is not None:
+            attention = attention.masked_fill(mask == 0, float("-inf"))
+
         attention = attention.softmax(dim=-1) @ v
         attention = attention.reshape(b, n, -1)
 
