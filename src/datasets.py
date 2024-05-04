@@ -35,17 +35,7 @@ class PolyMNIST(Dataset):
 
         polygon = self.df.polygon[index]
         polygon = np.fromstring(polygon, sep=",")
-
-        polygon = polygon.reshape(-1, 2)
-        polygon = np.c_[np.arange(1, len(polygon) + 1) /
-                        (len(polygon) + 1), polygon]
-        y = np.array([[0, 0, 0]])
-        z = np.array([[1, 0, 0]])
-        polygon = np.r_[y, polygon, z]
-
-        for i in range(0, 12 - len(polygon)):
-            polygon = np.r_[polygon, z]
-
+        polygon = polygon.reshape(-1, 3)
         polygon = torch.tensor(polygon, dtype=torch.float)
 
         return image, label, polygon
