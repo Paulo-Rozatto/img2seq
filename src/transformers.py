@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from .attention import Block
+from .attention import Block, DecoderBlock
 from .patchers import Patcher
 from .positionals import LearnableEncoder
 
@@ -55,5 +55,42 @@ class ViT(nn.Module):
 
         for block in self.blocks:
             x = block(x)
+
+        return x
+
+
+class Decoder(nn.Module):
+    """
+    Vision Transformer
+    """
+
+    def __init__(
+        self,
+        positional_encoder=LearnableEncoder,
+        block=DecoderBlock,
+        embed_dim=3,
+        n_blocks=2,
+        n_heads=1,
+        seq_len=12,
+        encoder_dim=8,
+        mlp_ratio=4,
+        attention_bias=False
+    ):
+        super(Decoder, self).__init__()
+
+        self.positional_encoder = positional_encoder(seq_len, embed_dim)
+
+        self.blocks = nn.ModuleList()
+        for _ in range(n_blocks):
+            self.blocks.append(
+                block(embed_dim, encoder_dim, n_heads,
+                      mlp_ratio, attention_bias)
+            )
+
+    def forward(self, x, encoder_embed, mask=None):
+        x = self.positional_encoder(x)
+
+        for block in self.blocks:
+            x = block(x, encoder_embed, mask)
 
         return x

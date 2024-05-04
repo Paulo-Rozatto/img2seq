@@ -10,7 +10,7 @@ class LearnableEncoder(nn.Module):
             torch.randn(input_dim, embed_dim).to(device))
 
     def forward(self, x):
-        b = x.shape[0]
+        b, n, _ = x.shape
         pos = self.positional.repeat(b, 1, 1)
-        x = x + pos
+        x = x + pos[:, :n, :]
         return x
