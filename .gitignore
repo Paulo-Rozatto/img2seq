@@ -3,3 +3,7 @@
 mnist/
 checkpoints/
 __pycache__
+images/
+logs/
+*.sh
+*.txt
