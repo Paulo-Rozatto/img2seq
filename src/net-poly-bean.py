@@ -10,8 +10,8 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 from torch import nn
 
-from src.datasets import PolyBean
-from src.transformers import ViT, Decoder
+from components.datasets import PolyBean
+from components.transformers import ViT, Decoder
 
 torch.manual_seed(0)
 
@@ -49,11 +49,11 @@ class Net(nn.Module):
 
 
 def load_datasets(batch_size):
-    train = PolyBean(csv_file="poly-bean/train/polygon-bean-leaf.csv",
-                      transform=ToTensor())
-
-    test = PolyBean(csv_file="poly-bean/test/polygon-bean-leaf.csv",
+    train = PolyBean(csv_file="../poly-bean/train/polygon-bean-leaf.csv",
                      transform=ToTensor())
+
+    test = PolyBean(csv_file="../poly-bean/test/polygon-bean-leaf.csv",
+                    transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
@@ -155,15 +155,15 @@ def predict(test_loader, name):
                 images[idx], poly[idx])
         subplot(fig, 2, idx_range, pos_pred, "Prediction",
                 images[idx], inputs[0])
-    fig.savefig(f"images/{name}.png")
+    fig.savefig(f"../images/{name}.png")
     plt.close(fig)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type=int, default=12)
+    parser.add_argument("-e", "--epochs", type=int, default=4)
     parser.add_argument("-l", "--learning_rate", type=float, default=0.001)
-    parser.add_argument("-d", "--dim_embedding", type=int, default=256)
+    parser.add_argument("-d", "--dim_embedding", type=int, default=64)
     parser.add_argument("-b", "--blocks", type=int, default=2)
     parser.add_argument("-bs", "--batch_size", type=int, default=20)
     parser.add_argument("-hd", "--heads", type=int, default=1)
@@ -192,11 +192,11 @@ if __name__ == "__main__":
     losses = train(epochs, model, mask, optimizer,
                    criterion, train_loader, test_loader)
 
-    log_file = open(f"logs/{name}.txt", "w")
+    log_file = open(f"../../logs/{name}.txt", "w")
     loss_str = "\n".join(losses)
     log_file.write(loss_str)
 
-    path = f"checkpoints/{name}.pth"
+    path = f"../../checkpoints/{name}.pth"
     torch.save(model.state_dict(), path)
 
     if args.checkpoint is not None:

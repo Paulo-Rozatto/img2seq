@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class PolyBean(Dataset):
+class PolyMNIST(Dataset):
     def __init__(self, csv_file, transform=None, label_transform=None, return_poly=True):
         self.df = read_csv(csv_file)
         self.path = path.dirname(csv_file)
@@ -38,7 +38,7 @@ class PolyBean(Dataset):
         polygon = polygon.reshape(-1, 3)
         polygon = torch.tensor(polygon, dtype=torch.float)
 
-        return image, polygon
+        return image, label, polygon
 
 
 class PolyBean(Dataset):
