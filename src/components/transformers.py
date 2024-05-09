@@ -68,11 +68,10 @@ class Decoder(nn.Module):
         self,
         positional_encoder=LearnableEncoder,
         block=DecoderBlock,
-        embed_dim=3,
+        embed_dim=16,
         n_blocks=2,
         n_heads=1,
         seq_len=12,
-        encoder_dim=8,
         mlp_ratio=4,
         attention_bias=False
     ):
@@ -83,7 +82,7 @@ class Decoder(nn.Module):
         self.blocks = nn.ModuleList()
         for _ in range(n_blocks):
             self.blocks.append(
-                block(embed_dim, encoder_dim, n_heads,
+                block(embed_dim, embed_dim, n_heads,
                       mlp_ratio, attention_bias)
             )
 

@@ -22,15 +22,15 @@ class PolyMNIST(Dataset):
         image_path = path.join(self.path, self.df.file_path[index])
         image = Image.open(image_path)
 
-        label = int(self.df.label[index])
-
         if self.transform:
             image = self.transform(image)
 
-        if self.label_transform:
-            label = self.label_transform(label)
-
         if not self.return_poly:
+            label = int(self.df.label[index])
+
+            if self.label_transform:
+                label = self.label_transform(label)
+
             return image, label
 
         polygon = self.df.polygon[index]
@@ -38,7 +38,7 @@ class PolyMNIST(Dataset):
         polygon = polygon.reshape(-1, 3)
         polygon = torch.tensor(polygon, dtype=torch.float)
 
-        return image, label, polygon
+        return image, polygon
 
 
 class PolyBean(Dataset):
