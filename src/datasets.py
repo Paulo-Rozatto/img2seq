@@ -2,12 +2,12 @@ from os import path
 from PIL import Image
 from pandas import read_csv
 import numpy as np
-# from numpy import fromstring, zeros
 
 import torch
 from torch.utils.data import Dataset
 
-class PolyMNIST(Dataset):
+
+class PolyBean(Dataset):
     def __init__(self, csv_file, transform=None, label_transform=None, return_poly=True):
         self.df = read_csv(csv_file)
         self.path = path.dirname(csv_file)

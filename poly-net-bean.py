@@ -1,4 +1,3 @@
-import cv2
 import torch
 import argparse
 import numpy as np
@@ -11,7 +10,7 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 from torch import nn
 
-from src.datasets import PolyMNIST
+from src.datasets import PolyBean
 from src.transformers import ViT, Decoder
 
 torch.manual_seed(0)
@@ -50,10 +49,10 @@ class Net(nn.Module):
 
 
 def load_datasets(batch_size):
-    train = PolyMNIST(csv_file="poly-bean/train/polygon-bean-leaf.csv",
+    train = PolyBean(csv_file="poly-bean/train/polygon-bean-leaf.csv",
                       transform=ToTensor())
 
-    test = PolyMNIST(csv_file="poly-bean/test/polygon-bean-leaf.csv",
+    test = PolyBean(csv_file="poly-bean/test/polygon-bean-leaf.csv",
                      transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
@@ -109,10 +108,6 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader):
 def subplot(fig, rows, cols, pos, title, img_tensor, poly_tensor):
     image = img_tensor.permute(1, 2, 0).cpu().numpy() * 255
 
-    # out = np.zeros((320, 320, 3))
-    # out[:, :, 0] = image[:, :, 0]
-    # out[:, :, 1] = image[:, :, 1]
-    # out[:, :, 2] = image[:, :, 2]
     out = np.copy(image)
 
     poly_tensor = poly_tensor[1:]
@@ -125,12 +120,8 @@ def subplot(fig, rows, cols, pos, title, img_tensor, poly_tensor):
     x = poly[:, 0, 0]
     y = poly[:, 0, 1]
 
-    # out = cv2.polylines(out, [poly], True, (100, 100, 255), 1)
-    # out[y, x] = [255.0, 0.0, 0.0]
-
     fig.add_subplot(rows, cols, pos)
     plt.imshow(out.astype(np.uint8))
-    # plt.scatter(x, y, c='red', markersize=1)
     plt.plot(x, y)
     plt.plot(x, y, marker=".", markersize=2, c='red', linestyle='None')
     plt.axis('off')

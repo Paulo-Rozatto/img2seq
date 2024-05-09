@@ -50,10 +50,10 @@ class Net(nn.Module):
 
 
 def load_datasets(batch_size):
-    train = PolyMNIST(csv_file="poly-bean/train/polygon-bean-leaf.csv",
+    train = PolyMNIST(csv_file="mnist/train/polygon-mnist.csv",
                       transform=ToTensor())
 
-    test = PolyMNIST(csv_file="poly-bean/test/polygon-bean-leaf.csv",
+    test = PolyMNIST(csv_file="mnist/test/polygon-mnist.csv",
                      transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
