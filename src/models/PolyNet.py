@@ -83,13 +83,15 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
 
 
 def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"):
-    images, polygons = next(iter(test_loader))
+    # images, polygons = next(iter(test_loader))
 
     fig = plt.figure(figsize=(20, 4))
 
+    it = iter(test_loader)
     for idx in range(idx_range):
         with torch.no_grad():
             model.eval()
+            images, polygons = next(it)
             inputs = torch.zeros(1, 1, 3).to(device)
             image = images[idx].unsqueeze(0).to(device)
 

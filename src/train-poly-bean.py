@@ -11,10 +11,10 @@ from components.transformers import ViT, Decoder
 
 
 def load_datasets(batch_size):
-    train = PolyBean(csv_file="../datasets/poly-bean/train/polygon-bean-leaf.csv",
+    train = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf.csv",
                      transform=ToTensor())
 
-    test = PolyBean(csv_file="../datasets/poly-bean/test/polygon-bean-leaf.csv",
+    test = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf.csv",
                     transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
@@ -23,6 +23,8 @@ def load_datasets(batch_size):
 
 
 if __name__ == "__main__":
+    torch.manual_seed(0)
+
     name, args = PolyNet.parse_args()
 
     device = None

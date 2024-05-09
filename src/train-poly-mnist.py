@@ -23,6 +23,8 @@ def load_datasets(batch_size):
 
 
 if __name__ == "__main__":
+    torch.manual_seed(0)
+
     name, args = PolyNet.parse_args()
 
     device = None
@@ -61,7 +63,7 @@ if __name__ == "__main__":
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)
 
-    losses = PolyNet.train(1, model, mask, optimizer,
+    losses = PolyNet.train(args.epochs, model, mask, optimizer,
                            criterion, train_loader, test_loader, device)
 
     log_file = open(f"../logs/{name}.txt", "w")
