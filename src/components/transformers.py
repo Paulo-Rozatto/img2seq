@@ -34,10 +34,10 @@ class ViT(nn.Module):
 
         c, h, w = img_shape
         input_dim = patch_size * patch_size * c
-        n_patches = h * w // input_dim + 1
+        n_patches = h * w // (patch_size * patch_size)
 
         self.patcher = patcher(input_dim, embed_dim, patch_bias)
-        self.positional_encoder = positional_encoder(n_patches, embed_dim)
+        self.positional_encoder = positional_encoder(n_patches + 1, embed_dim)
         self.blocks = nn.ModuleList()
 
         for _ in range(n_blocks):
