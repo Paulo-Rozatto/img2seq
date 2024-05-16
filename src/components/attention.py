@@ -116,11 +116,16 @@ class DecoderBlock(nn.Module):
             nn.Linear(embed_dim * mlp_ratio, embed_dim)
         )
 
-    def forward(self, x, encoder_embed, mask=None):
+    def forward(self, x, encoder_embed, mask=None, pad_mask=None):
         b, n, _ = x.shape
+
+        if not pad_mask is None:
+            x[:, 1:][~pad_mask] = torch.zeros_like(x[0, 0])
+
         x = self.norm1(x + self.selfAttention(x, mask))
 
         q = self.q(x).view(b, n, 1, -1)
+
         vk = self.kv(encoder_embed).view(b, 1, 2, -1)
         qkv = torch.cat((q, vk.repeat((1, n, 1, 1))), dim=2)
 

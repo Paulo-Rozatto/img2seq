@@ -86,10 +86,10 @@ class Decoder(nn.Module):
                       mlp_ratio, attention_bias)
             )
 
-    def forward(self, x, encoder_embed, mask=None):
+    def forward(self, x, encoder_embed, mask=None, pad_mask=None):
         x = self.positional_encoder(x)
 
         for block in self.blocks:
-            x = block(x, encoder_embed, mask)
+            x = block(x, encoder_embed, mask, pad_mask)
 
         return x
