@@ -57,11 +57,14 @@ if __name__ == "__main__":
     optimizer = Adam(model.parameters(), lr=args.learning_rate)
     criterion = MSELoss()
 
+    print("Loading dataset to memory...")
     train_loader, test_loader = load_datasets(args.batch_size)
+    print("Dataset loaded")
+
     mask = torch.tril(torch.ones(200, 200)).view(1, 200, 200).to(device)
 
     model = model.to(device)
-    name = "bean_no_pad2_" + name
+    name = "bean_default_" + name
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)
