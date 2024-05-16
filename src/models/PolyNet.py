@@ -28,10 +28,10 @@ class Model(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x, p, mask=None):
+    def forward(self, x, p, mask=None, pad_mask=None):
         x = self.encoder(x)
         p = self.mapper(p)
-        x = self.decoder(p, x[:, 0, :], mask)
+        x = self.decoder(p, x[:, 0, :], mask, pad_mask)
         x = self.mlp(x)
 
         return x
@@ -45,13 +45,15 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
         train_loss = 0.0
 
         for batch in tqdm(train_loader, desc=f"Epoch {epoch + 1} in training", leave=False):
-            image, polygon = batch
+            image, polygon, pad_mask = batch
 
             image = image.to(device)
             polygon = polygon.to(device)
+            pad_mask = pad_mask.to(device)
 
-            pred = model(image, polygon, mask)
-            loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
+            pred = model(image, polygon, mask, pad_mask)
+            loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
+            # loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
 
             loss.backward()
             optimizer.step()
@@ -65,12 +67,14 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
             total = 0
             test_loss = 0.0
             model.eval()
-            for batch in tqdm(test_loader, desc="Testing"):
-                x, p = batch
-                x, p = x.to(device), p.to(device)
 
-                pred = model(image, polygon, mask)
-                loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
+            for batch in tqdm(test_loader, desc="Testing"):
+                x, p, m = batch
+                x, p, m = x.to(device), p.to(device), m.to(device)
+
+                pred = model(x, p, mask, m)
+                loss = criterion(pred[:, :-1, :][m], p[:, 1:, :][m])
+                # loss = criterion(pred[:, :-1, :], p[:, 1:, :])
 
                 test_loss += loss.detach().cpu().item() / len(test_loader)
 
@@ -91,7 +95,7 @@ def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"
     for idx in range(idx_range):
         with torch.no_grad():
             model.eval()
-            images, polygons = next(it)
+            images, polygons, _ = next(it)
             inputs = torch.zeros(1, 1, 3).to(device)
             image = images[idx].unsqueeze(0).to(device)
 
@@ -112,7 +116,7 @@ def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"
                 "Ground truth", img, poly, cmap='gray')
         subplot(fig, 2, idx_range, pos_pred,
                 "Prediction", img, inputs[0], cmap='gray')
-    fig.savefig(f"../images/{name}.png")
+    fig.savefig(f"./images/{name}.png")
     plt.close(fig)
 
 
@@ -124,7 +128,7 @@ def parse_args():
     parser.add_argument("-b", "--blocks", type=int, default=2)
     parser.add_argument("-bs", "--batch_size", type=int, default=30)
     parser.add_argument("-hd", "--heads", type=int, default=1)
-    parser.add_argument("-sq", "--seq_len", type=int, default=12)
+    parser.add_argument("-sq", "--seq_len", type=int, default=20)
     parser.add_argument("-cp", "--checkpoint", type=str, default=None)
     parser.add_argument(
         "-s", "--strict", action=argparse.BooleanOptionalAction, default=False)

@@ -8,7 +8,7 @@ def subplot(fig, rows, cols, pos, title, img_tensor, poly_tensor, cmap=None):
     out = np.copy(image)
 
     poly_tensor = poly_tensor[1:]
-    filter_1_out = poly_tensor[:, 0] < 1.0
+    filter_1_out = poly_tensor[:, 0] != 0.0
     poly_tensor = poly_tensor[filter_1_out]
 
     poly = poly_tensor.cpu().numpy()
