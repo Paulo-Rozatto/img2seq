@@ -59,7 +59,7 @@ if __name__ == "__main__":
     mask = torch.tril(torch.ones(20, 20)).view(1, 20, 20).to(device)
 
     model = model.to(device)
-    name = "mnist_mask_loss_sa_" + name
+    name = "mnist_test" + name
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)

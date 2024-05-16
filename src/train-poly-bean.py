@@ -11,10 +11,10 @@ from components.transformers import ViT, Decoder
 
 
 def load_datasets(batch_size):
-    train = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf.csv",
+    train = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf3.csv",
                      transform=ToTensor())
 
-    test = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf.csv",
+    test = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf3.csv",
                     transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     decoder = Decoder(
         embed_dim=args.dim_embedding,
-        seq_len=args.seq_len,
+        seq_len=200,
         n_blocks=args.blocks,
         n_heads=args.heads
     )
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     mask = torch.tril(torch.ones(200, 200)).view(1, 200, 200).to(device)
 
     model = model.to(device)
-    name = "bean_" + name
+    name = "bean_no_pad2_" + name
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)
@@ -69,11 +69,11 @@ if __name__ == "__main__":
     losses = PolyNet.train(args.epochs, model, mask, optimizer,
                            criterion, train_loader, test_loader, device)
 
-    log_file = open(f"../logs/{name}.txt", "w")
+    log_file = open(f"./logs/{name}.txt", "w")
     loss_str = "\n".join(losses)
     log_file.write(loss_str)
 
-    path = f"../checkpoints/{name}.pth"
+    path = f"./checkpoints/{name}.pth"
     torch.save(model.state_dict(), path)
 
     PolyNet.predict(model, name, test_loader, mask, 10, 199, device)

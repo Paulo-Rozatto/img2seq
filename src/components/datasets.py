@@ -69,4 +69,9 @@ class PolyBean(Dataset):
         polygon = polygon.reshape(-1, 3)
         polygon = torch.tensor(polygon, dtype=torch.float)
 
-        return image, polygon
+        length = int(self.df.length[index])
+        pad_mask = torch.ones(199, dtype=torch.bool)
+        if length < 199:
+            pad_mask[length - 1:] = False
+
+        return image, polygon, pad_mask

@@ -53,6 +53,7 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
 
             pred = model(image, polygon, mask, pad_mask)
             loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
+            # loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
 
             loss.backward()
             optimizer.step()
@@ -73,6 +74,7 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
 
                 pred = model(x, p, mask, m)
                 loss = criterion(pred[:, :-1, :][m], p[:, 1:, :][m])
+                # loss = criterion(pred[:, :-1, :], p[:, 1:, :])
 
                 test_loss += loss.detach().cpu().item() / len(test_loader)
 
