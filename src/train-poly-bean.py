@@ -79,4 +79,5 @@ if __name__ == "__main__":
     path = f"./checkpoints/{name}.pth"
     torch.save(model.state_dict(), path)
 
-    PolyNet.predict(model, name, test_loader, mask, 10, 199, device)
+    idx_list = [0, 10, 23, 34, 48, 58, 70, 79, 89, 99]
+    PolyNet.predict(model, name, test_loader, mask, idx_list, 199, device)

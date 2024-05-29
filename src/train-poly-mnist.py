@@ -55,10 +55,13 @@ if __name__ == "__main__":
     optimizer = Adam(model.parameters(), lr=args.learning_rate)
     criterion = MSELoss()
 
+    print("Loading dataset to memory...")
     train_loader, test_loader = load_datasets(args.batch_size)
-    mask = torch.tril(torch.ones(20, 20)).view(1, 20, 20).to(device)
+    print("Dataset loaded")
 
+    mask = torch.tril(torch.ones(20, 20)).view(1, 20, 20).to(device)
     model = model.to(device)
+
     name = "mnist_test" + name
 
     if args.checkpoint is not None:
@@ -74,4 +77,5 @@ if __name__ == "__main__":
     path = f"./checkpoints/{name}.pth"
     torch.save(model.state_dict(), path)
 
-    PolyNet.predict(model, name, test_loader, mask, 10, 19, device)
+    idx_list = [3, 2, 1, 18, 6, 59, 11, 17, 61, 58]
+    PolyNet.predict(model, name, test_loader, mask, idx_list, 19, device)

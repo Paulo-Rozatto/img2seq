@@ -3,7 +3,6 @@ import numpy as np
 
 
 def iou(polygon, pred, size=320):
-
     pred = pred[:, 1:].detach().cpu().numpy() * size
     polygon = polygon[:, 1:].detach().cpu().numpy() * size
 

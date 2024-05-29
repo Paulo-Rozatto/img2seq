@@ -75,12 +75,14 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
 
             for batch in tqdm(test_loader, desc="Testing"):
                 image, polygon, pad_mask = batch
-                image, polygon, pad_mask = image.to(device), polygon.to(device), pad_mask.to(device)
+                image, polygon, pad_mask = image.to(
+                    device), polygon.to(device), pad_mask.to(device)
 
                 pred = model(image, polygon, mask, pad_mask)
 
                 # loss = criterion(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
-                miou += metrics.iou(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
+                miou += metrics.iou(pred[0, :-1, :][pad_mask[0]],
+                                    polygon[0, 1:, :][pad_mask[0]])
                 for i in range(1, len(polygon)):
                     # loss += criterion(pred[i, :-1, :][pad_mask[i]], polygon[i, 1:, :][pad_mask[i]])
                     miou += metrics.iou(pred[i, :-1, :], polygon[i, 1:, :])
@@ -98,22 +100,22 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
     return losses
 
 
-def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"):
-    # images, polygons = next(iter(test_loader))
+def predict(model, name, test_loader, mask, idx_list = [0, 5, 10], max_pred = 11, device="cpu"):
+    length = len(idx_list)
 
     fig = plt.figure(figsize=(20, 4))
 
     it = iter(test_loader)
     miou = 0
-    for idx in range(idx_range):
+    for j, idx in zip(range(length), idx_list):
         with torch.no_grad():
             model.eval()
-            images, polygons, pad_mask = next(it)
+            image, polygon, pad_mask = test_loader.dataset.__getitem__(idx)
             inputs = torch.zeros(1, 1, 3).to(device)
-            image = images[idx].unsqueeze(0).to(device)
+            image_device = image.unsqueeze(0).to(device)
 
             for i in range(max_pred):
-                pred = model(image, inputs, mask[:, :i + 1, :i + 1])
+                pred = model(image_device, inputs, mask[:, :i + 1, :i + 1])
 
                 if (pred[0, -1, 0] > 0.95):
                     break
@@ -121,17 +123,16 @@ def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"
                 inputs = torch.cat(
                     (inputs, pred[:, -1, :].view(1, 1, -1)), dim=1)
 
-        pos_gt = idx + 1
-        pos_pred = pos_gt + idx_range
-        img, poly = images[idx], polygons[idx]
-        miou += metrics.iou(poly[1:][pad_mask[idx]], inputs[0, 1:])
+        pos_gt = j + 1
+        pos_pred = pos_gt + length
+        miou += metrics.iou(polygon[1:][pad_mask], inputs[0, 1:])
 
-        subplot(fig, 2, idx_range, pos_gt,
-                "Ground truth", img, poly, cmap='gray')
-        subplot(fig, 2, idx_range, pos_pred,
-                "Prediction", img, inputs[0], cmap='gray')
-    
-    print(f"miou: {(miou / idx_range):.4f}")
+        subplot(fig, 2, length, pos_gt,
+                "Ground truth", image, polygon, cmap='gray')
+        subplot(fig, 2, length, pos_pred,
+                "Prediction", image, inputs[0], cmap='gray')
+
+    print(f"miou: {(miou / length):.4f}")
     fig.savefig(f"./images/{name}.png")
     plt.close(fig)
 
