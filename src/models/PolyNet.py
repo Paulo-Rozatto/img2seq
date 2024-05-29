@@ -7,6 +7,7 @@ from tqdm import trange, tqdm
 
 from components.transformers import ViT, Decoder
 from utils.plots import subplot
+from utils import metrics
 
 
 class Model(nn.Module):
@@ -52,8 +53,11 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
             pad_mask = pad_mask.to(device)
 
             pred = model(image, polygon, mask, pad_mask)
-            loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
-            # loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
+
+            # loss = criterion(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
+            # for i in range(1, len(polygon)):
+            #     loss += criterion(pred[i, :-1, :][pad_mask[i]], polygon[i, 1:, :][pad_mask[i]])
+            loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
 
             loss.backward()
             optimizer.step()
@@ -66,20 +70,28 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
         with torch.no_grad():
             total = 0
             test_loss = 0.0
+            miou = 0.0
             model.eval()
 
             for batch in tqdm(test_loader, desc="Testing"):
-                x, p, m = batch
-                x, p, m = x.to(device), p.to(device), m.to(device)
+                image, polygon, pad_mask = batch
+                image, polygon, pad_mask = image.to(device), polygon.to(device), pad_mask.to(device)
 
-                pred = model(x, p, mask, m)
-                loss = criterion(pred[:, :-1, :][m], p[:, 1:, :][m])
-                # loss = criterion(pred[:, :-1, :], p[:, 1:, :])
+                pred = model(image, polygon, mask, pad_mask)
+
+                # loss = criterion(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
+                miou += metrics.iou(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
+                for i in range(1, len(polygon)):
+                    # loss += criterion(pred[i, :-1, :][pad_mask[i]], polygon[i, 1:, :][pad_mask[i]])
+                    miou += metrics.iou(pred[i, :-1, :], polygon[i, 1:, :])
+
+                loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
 
                 test_loss += loss.detach().cpu().item() / len(test_loader)
 
-                total += len(x)
+                total += len(image)
             print(f"Test loss: {test_loss:.4f}")
+            print(f"miou: {(miou / len(test_loader.dataset)):.4f}")
 
         losses.append(
             f"Epoch {epoch + 1}/{epochs}\n\ttrain loss: {train_loss:.4f}\n\ttest loss:{test_loss:.4f}\n")
@@ -92,10 +104,11 @@ def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"
     fig = plt.figure(figsize=(20, 4))
 
     it = iter(test_loader)
+    miou = 0
     for idx in range(idx_range):
         with torch.no_grad():
             model.eval()
-            images, polygons, _ = next(it)
+            images, polygons, pad_mask = next(it)
             inputs = torch.zeros(1, 1, 3).to(device)
             image = images[idx].unsqueeze(0).to(device)
 
@@ -111,11 +124,14 @@ def predict(model, name, test_loader, mask, idx_range, max_pred=11, device="cpu"
         pos_gt = idx + 1
         pos_pred = pos_gt + idx_range
         img, poly = images[idx], polygons[idx]
+        miou += metrics.iou(poly[1:][pad_mask[idx]], inputs[0, 1:])
 
         subplot(fig, 2, idx_range, pos_gt,
                 "Ground truth", img, poly, cmap='gray')
         subplot(fig, 2, idx_range, pos_pred,
                 "Prediction", img, inputs[0], cmap='gray')
+    
+    print(f"miou: {(miou / idx_range):.4f}")
     fig.savefig(f"./images/{name}.png")
     plt.close(fig)
 
