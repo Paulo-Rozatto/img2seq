@@ -25,7 +25,9 @@ class Model(nn.Module):
         self.mapper = nn.Linear(3, embed_dim)
 
         self.mlp = nn.Sequential(
-            nn.Linear(embed_dim, 3),
+            nn.Linear(embed_dim, 4 * embed_dim),
+            nn.Sigmoid(),
+            nn.Linear(4 * embed_dim, 3),
             nn.Sigmoid()
         )
 
@@ -57,7 +59,10 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
             # loss = criterion(pred[0, :-1, :][pad_mask[0]], polygon[0, 1:, :][pad_mask[0]])
             # for i in range(1, len(polygon)):
             #     loss += criterion(pred[i, :-1, :][pad_mask[i]], polygon[i, 1:, :][pad_mask[i]])
+            # r = (pred[:, :, 0] > 0.9).nonzero()
             loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
+
+            # loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
 
             loss.backward()
             optimizer.step()
