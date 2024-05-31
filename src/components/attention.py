@@ -100,7 +100,8 @@ class Block(nn.Module):
         self.mlp = nn.Sequential(
             nn.Linear(embed_dim, embed_dim * mlp_ratio),
             nn.GELU(),
-            nn.Linear(embed_dim * mlp_ratio, embed_dim)
+            nn.Linear(embed_dim * mlp_ratio, embed_dim),
+            nn.GELU()
         )
 
     def forward(self, x):
@@ -117,6 +118,8 @@ class DecoderBlock(nn.Module):
         self.norm2 = nn.LayerNorm(encoder_dim)
         self.norm3 = nn.LayerNorm(embed_dim)
 
+        self.dropout = nn.Dropout(0.1)
+
         self.q = nn.Linear(encoder_dim, encoder_dim, bias=attention_bias)
         self.kv = nn.Linear(encoder_dim, 2 * encoder_dim)
 
@@ -125,14 +128,17 @@ class DecoderBlock(nn.Module):
 
         self.mlp = nn.Sequential(
             nn.Linear(embed_dim, embed_dim * mlp_ratio),
-            nn.GELU(),
-            nn.Linear(embed_dim * mlp_ratio, embed_dim)
+            nn.ReLU(),
+            nn.Linear(embed_dim * mlp_ratio, embed_dim),
+            nn.ReLU()
         )
 
     def forward(self, x, encoder_embed, mask=None, pad_mask=None):
         b, n, _ = x.shape
 
-        x = self.norm1(x + self.selfAttention(x, mask, pad_mask))
+        x2 = self.selfAttention(x, mask, pad_mask)
+        x2 = self.dropout(x)
+        x = self.norm1(x + x2)
 
         q = self.q(x).view(b, n, 1, -1)
 
