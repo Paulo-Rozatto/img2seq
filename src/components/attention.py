@@ -95,6 +95,8 @@ class Block(nn.Module):
         self.norm1 = nn.LayerNorm(embed_dim)
         self.norm2 = nn.LayerNorm(embed_dim)
 
+        self.dropout = nn.Dropout(0.1)
+
         self.attention = SelfAttention(embed_dim, n_heads, attention_bias)
 
         self.mlp = nn.Sequential(
@@ -105,7 +107,9 @@ class Block(nn.Module):
         )
 
     def forward(self, x):
-        x = x + self.attention(self.norm1(x))
+        x2 = self.attention(self.norm1(x))
+        x2 = self.dropout(x2)
+        x = x + x2
         x = x + self.mlp(self.norm2(x))
         return x
 
