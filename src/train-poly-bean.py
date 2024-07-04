@@ -6,16 +6,16 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
 
 from models import PolyNet
-from components.datasets import PolyBean
+from components.datasets import PolyBean, AugmentBean
 from components.transformers import ViT, Decoder
 
 
 def load_datasets(batch_size):
-    train = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf3.csv",
+    train = AugmentBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf4.csv",
                      transform=ToTensor())
 
-    test = PolyBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf3.csv",
-                    transform=ToTensor())
+    test = AugmentBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf4.csv",
+                    transform=ToTensor(), test=True)
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     mask = torch.tril(torch.ones(200, 200)).view(1, 200, 200).to(device)
 
     model = model.to(device)
-    name = "bean_mlp_sigsig_dropout_rrgg_" + name
+    name = "bean_augment_sigsig_dropout2_rrgg_" + name
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)

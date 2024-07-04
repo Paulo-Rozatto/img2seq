@@ -60,8 +60,8 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
             # for i in range(1, len(polygon)):
             #     loss += criterion(pred[i, :-1, :][pad_mask[i]], polygon[i, 1:, :][pad_mask[i]])
             # r = (pred[:, :, 0] > 0.9).nonzero()
-            loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
 
+            loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
             # loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
 
             loss.backward()
@@ -70,7 +70,7 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
 
             train_loss += loss.item() / len(train_loader)
 
-        print(f"Epoch {epoch + 1}/{epochs} loss: {train_loss:.4f}")
+        print(f"\nEpoch {epoch + 1}/{epochs} loss: {train_loss:.4f}")
 
         with torch.no_grad():
             total = 0
@@ -93,6 +93,7 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
                     miou += metrics.iou(pred[i, :-1, :], polygon[i, 1:, :])
 
                 loss = criterion(pred[:, :-1, :], polygon[:, 1:, :])
+                # loss = criterion(pred[:, :-1, :][pad_mask], polygon[:, 1:, :][pad_mask])
 
                 test_loss += loss.detach().cpu().item() / len(test_loader)
 
