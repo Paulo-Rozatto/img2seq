@@ -139,6 +139,7 @@ def predict(model, path, test_loader, mask, idx_list = [0, 5, 10], max_pred = 11
                 "Prediction", image, inputs[0], cmap='gray')
 
     print(f"miou: {(miou / length):.4f}")
+    fig.suptitle(f"miou: {(miou / length):.4f}")
     fig.savefig(path)
     plt.close(fig)
 

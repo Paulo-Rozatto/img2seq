@@ -19,7 +19,7 @@ class SelfAttention(nn.Module):
 
     def forward(self, x, mask=None, pad_mask=None):
         # b: batch size, n: number of patches
-        b, n, _ = x.shape
+        b, n, c = x.shape
 
         # calculate qkv in the same tensor
         # then, reshape to split query, keys and values and to
@@ -40,8 +40,8 @@ class SelfAttention(nn.Module):
 
         attention = (q @ k.transpose(-2, -1)) * self.scaling_factor
 
-        if pad_mask is not None:
-            attention[:, :, 1:].transpose(-2, -1)[~pad_mask] = float("-inf")
+        # if pad_mask is not None:
+        #     attention[:, :, 1:].transpose(-2, -1)[~pad_mask] = float("-inf")
             # attention[:, 1:, :][~pad_mask] = float("-inf")
             # attention = attention.masked_fill(attention == 0.0, float("-inf"))
 
@@ -49,7 +49,7 @@ class SelfAttention(nn.Module):
             attention = attention.masked_fill(mask == 0, float("-inf"))
 
         attention = attention.softmax(dim=-1) @ v
-        attention = attention.reshape(b, n, -1)
+        attention = attention.reshape(b, n, c)
 
         return self.linear_proj(attention)
 

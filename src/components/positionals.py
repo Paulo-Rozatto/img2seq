@@ -1,16 +1,36 @@
+import math
 import torch
 from torch import nn
 
 
 class LearnableEncoder(nn.Module):
-    def __init__(self, input_dim, embed_dim=16):
+    def __init__(self, n_patches, embed_dim=16):
         super(LearnableEncoder, self).__init__()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.positional = nn.Parameter(
-            torch.randn(input_dim, embed_dim).to(device))
+            torch.empty(1, n_patches, embed_dim).normal_(std=0.02)
+        )
 
     def forward(self, x):
-        b, n, _ = x.shape
-        pos = self.positional.repeat(b, 1, 1)
-        x = x + pos[:, :n, :]
+        return x + self.positional
+
+
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, max_seq_len=200, embed_dim=16, dropout=0.1):
+        super().__init__()
+        # self.dropout = nn.Dropout(p=dropout)
+
+        position = torch.arange(max_seq_len).unsqueeze(1)
+        div_term = torch.exp(
+            torch.arange(0, embed_dim, 2) * (-math.log(10000.0) / embed_dim)
+        )
+
+        positional = torch.zeros(max_seq_len, 1, embed_dim)
+        positional[:, 0, 0::2] = torch.sin(position * div_term)
+        positional[:, 0, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('positional', positional)
+
+    def forward(self, x):
+        x = x + self.positional[:x.shape[0]]
         return x
+        # return self.dropout(x)
