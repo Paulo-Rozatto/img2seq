@@ -1,5 +1,6 @@
 import torch
 
+from os import makedirs
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -11,11 +12,11 @@ from components.transformers import ViT, Decoder
 
 
 def load_datasets(batch_size):
-    train = AugmentBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/train/polygon-bean-leaf4.csv",
-                     transform=ToTensor())
+    train = AugmentBean(csv_file="datasets/poly-bean/train/polygon-bean-leaf3.csv",
+                        transform=ToTensor())
 
-    test = AugmentBean(csv_file="/media/paulo/b0f89c99-3dc8-428a-877d-75f05b66d7f8/home/paulo/fine-tune/poly-bean/test/polygon-bean-leaf4.csv",
-                    transform=ToTensor(), test=True)
+    test = AugmentBean(csv_file="datasets/poly-bean/test/polygon-bean-leaf3.csv",
+                       transform=ToTensor(), test=True)
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     mask = torch.tril(torch.ones(200, 200)).view(1, 200, 200).to(device)
 
     model = model.to(device)
-    name = "bean_augment_sigsig_dropout2_rrgg_" + name
+    folder_name = "tetest"
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)
@@ -72,12 +73,15 @@ if __name__ == "__main__":
     losses = PolyNet.train(args.epochs, model, mask, optimizer,
                            criterion, train_loader, test_loader, device)
 
-    log_file = open(f"./logs/{name}.txt", "w")
+    makedirs(f"./logs/{folder_name}/", exist_ok=True)
+    log_file = open(f"./logs/{folder_name}/{name}.txt", "w")
     loss_str = "\n".join(losses)
     log_file.write(loss_str)
 
-    path = f"./checkpoints/{name}.pth"
+    makedirs(f"./checkpoints/{folder_name}/", exist_ok=True)
+    path = f"./checkpoints/{folder_name}/{name}.pth"
     torch.save(model.state_dict(), path)
 
     idx_list = [0, 10, 23, 34, 48, 58, 70, 79, 89, 99]
-    PolyNet.predict(model, name, test_loader, mask, idx_list, 199, device)
+    makedirs(f"./images/{folder_name}/", exist_ok=True)
+    PolyNet.predict(model, f"./images/{folder_name}/{name}.png", test_loader, mask, idx_list, 199, device)
