@@ -26,14 +26,16 @@ class ViT(nn.Module):
         patch_bias=False
     ):
         super(ViT, self).__init__()
-    
+
         self.class_token = nn.Parameter(
             torch.empty(1, embed_dim).normal_(std=0.02)
         )
 
         _, h, w = img_shape
+        _, h, w = img_shape
         n_patches = h * w // (patch_size * patch_size)
 
+        self.patcher = patcher(img_shape, patch_size, embed_dim, patch_bias)
         self.patcher = patcher(img_shape, patch_size, embed_dim, patch_bias)
         self.positional_encoder = positional_encoder(n_patches + 1, embed_dim)
         self.blocks = nn.ModuleList()
