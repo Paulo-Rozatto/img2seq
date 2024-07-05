@@ -12,11 +12,11 @@ from components.transformers import ViT, Decoder
 
 
 def load_datasets(batch_size):
-    train = AugmentBean(csv_file="datasets/poly-bean/train/polygon-bean-leaf3.csv",
+    train = PolyBean(csv_file="datasets/poly-bean/train/polygon-bean-leaf2.csv",
                         transform=ToTensor())
 
-    test = AugmentBean(csv_file="datasets/poly-bean/test/polygon-bean-leaf3.csv",
-                       transform=ToTensor(), test=True)
+    test = PolyBean(csv_file="datasets/poly-bean/test/polygon-bean-leaf2.csv",
+                       transform=ToTensor())
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
