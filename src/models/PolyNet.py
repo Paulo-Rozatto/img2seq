@@ -106,7 +106,7 @@ def train(epochs, model, mask, optimizer, criterion, train_loader, test_loader, 
     return losses
 
 
-def predict(model, name, test_loader, mask, idx_list = [0, 5, 10], max_pred = 11, device="cpu"):
+def predict(model, path, test_loader, mask, idx_list = [0, 5, 10], max_pred = 11, device="cpu"):
     length = len(idx_list)
 
     fig = plt.figure(figsize=(20, 4))
@@ -139,7 +139,7 @@ def predict(model, name, test_loader, mask, idx_list = [0, 5, 10], max_pred = 11
                 "Prediction", image, inputs[0], cmap='gray')
 
     print(f"miou: {(miou / length):.4f}")
-    fig.savefig(f"./images/{name}.png")
+    fig.savefig(path)
     plt.close(fig)
 
 
