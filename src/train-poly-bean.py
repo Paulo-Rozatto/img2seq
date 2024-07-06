@@ -65,7 +65,7 @@ if __name__ == "__main__":
     mask = torch.tril(torch.ones(200, 200)).view(1, 200, 200).to(device)
 
     model = model.to(device)
-    folder_name = "tetest"
+    folder_name = "dropouts"
 
     if args.checkpoint is not None:
         model.load_state_dict(torch.load(args.checkpoint), strict=args.strict)
